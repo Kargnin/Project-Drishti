@@ -1,11 +1,13 @@
 from fastapi import FastAPI, Request, HTTPException
 from google.cloud import firestore
-from vertexai.generative_models import GenerativeModel, Part, Tool
+from vertexai.preview.generative_models import GenerativeModel, Part, Tool
+import vertexai
 import json
 import os
 import base64
 import logging
-
+from dotenv import load_dotenv
+load_dotenv()
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,7 +19,10 @@ app = FastAPI(
 )
 
 # Initialize Firestore DB client
-db = firestore.Client()
+db = firestore.Client(project="noted-throne-466513-v6")
+
+project_id = "noted-throne-466513-v6"
+vertexai.init(project=project_id, location="us-central1") 
 
 # Initialize Vertex AI Generative Model (Gemini)
 # Ensure your service account has Vertex AI User role
@@ -169,15 +174,16 @@ def get_incident_details(incident_id: str):
 
 # Define the tools for the LLM
 event_management_tools = [
-    Tool.from_function(analyze_video_feed),
-    Tool.from_function(dispatch_to_security_agent),
-    Tool.from_function(dispatch_to_medassist_agent),
-    Tool.from_function(dispatch_to_queue_management_agent),
-    Tool.from_function(create_incident),
-    Tool.from_function(update_incident_status),
-    Tool.from_function(get_incident_details),
+    Tool.from_function_declarations([analyze_video_feed]),
+    Tool.from_function_declarations([dispatch_to_security_agent]),
+    Tool.from_function_declarations([dispatch_to_medassist_agent]),
+    Tool.from_function_declarations([dispatch_to_queue_management_agent]),
+    Tool.from_function_declarations([create_incident]),
+    Tool.from_function_declarations([update_incident_status]),
+    Tool.from_function_declarations([get_incident_details]),
     # Add other tools like dispatch_to_infrastructure_agent, get_historical_incidents etc.
 ]
+
 
 @app.post("/process_input")
 async def process_input(request: Request):
