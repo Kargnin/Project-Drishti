@@ -1,0 +1,21 @@
+# requirements.txt for Supervisor Agent Cloud Run Service
+
+# Google Cloud Firestore client library
+google-cloud-firestore==2.*
+
+# Google Cloud Vertex AI SDK (for Gemini API)
+vertexai==1.*
+
+# ASGI web framework for building APIs with Python 3.7+
+fastapi==0.*
+
+# ASGI server, commonly used with FastAPI
+uvicorn==0.*
+
+# Other standard libraries used (often implicitly available or part of base image)
+# If you encounter issues, you might need to explicitly add:
+# google-auth
+# google-api-core
+# google-cloud-core
+# grpcio
+# protobuf
