@@ -1,0 +1,30 @@
+[project]
+name = "comms-resources-agent"
+version = "0.1.0"
+description = "A communication and resource management agent that coordinates multilingual broadcasting, resource deployment, drone dispatch, and announcements using GCP Translation API, Text-to-Speech, and Pub/Sub."
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-adk>=1.8.0,<2.0.0",
+    "google-cloud-aiplatform[adk,agent_engine]>=1.100.0",
+    "google-cloud-translate>=3.0.0",
+    "google-cloud-texttospeech>=2.0.0",
+    "google-cloud-pubsub>=2.0.0",
+    "google-cloud-storage>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "pathlib",
+    "asyncio",
+    "requests>=2.25.0",
+    "pydantic>=1.8.0",
+    "schedule>=1.1.0"
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false 

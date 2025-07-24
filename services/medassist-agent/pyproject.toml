@@ -1,0 +1,24 @@
+[project]
+name = "medassist-agent"
+version = "0.1.0"
+description = "A medical emergency response agent that can detect medical emergencies, analyze symptoms, and coordinate appropriate medical response."
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-adk>=1.8.0,<2.0.0",
+    "google-cloud-aiplatform[adk,agent_engine]>=1.100.0",
+    "google-cloud-healthcare>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "pathlib",
+    "asyncio"
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false 

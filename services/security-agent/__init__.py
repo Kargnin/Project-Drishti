@@ -23,7 +23,6 @@ Usage:
 """
 from . import agent
 from . import prompt
-from . import config
 
 
 # from .config import THREAT_LEVELS, SECURITY_KEYWORDS, SECURITY_AGENT_ID

@@ -1,0 +1,23 @@
+[project]
+name = "infrastructure-agent"
+version = "0.1.0"
+description = "An infrastructure agent that can monitor physical infrastructure including power, connectivity, and structural integrity."
+authors = [
+    {name = "Your Name",email = "you@example.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "google-adk>=1.8.0,<2.0.0",
+    "google-cloud-aiplatform[adk,agent_engine]>=1.100.0",
+    "python-dotenv>=1.0.0",
+    "pathlib",
+    "asyncio"
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+package-mode = false 
