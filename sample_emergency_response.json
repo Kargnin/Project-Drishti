@@ -1,0 +1,31 @@
+{
+  "incident_id": "INC-2024-001",
+  "incident_type": "stampede",
+  "location": {
+    "type": "Point",
+    "coordinates": [
+      77.602097,
+      12.979938
+    ]
+  },
+  "affected_zones": [
+    "zone_002",
+    "zone_001"
+  ],
+  "required_resources": {
+    "medical_staff": 10,
+    "crowd_control": 15,
+    "security_personnel": 8,
+    "ambulances": 3
+  },
+  "response_plan": [
+    "Deploy crowd control barriers immediately",
+    "Activate emergency PA system with calm instructions",
+    "Dispatch medical teams to affected area",
+    "Secure alternative exit routes",
+    "Establish triage area at medical station",
+    "Coordinate with external emergency services"
+  ],
+  "estimated_response_time_minutes": 8,
+  "priority_level": 1
+}

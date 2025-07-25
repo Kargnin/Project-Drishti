@@ -1,0 +1,25 @@
+{
+  "deployment_id": "DEP-2024-001",
+  "target_zones": [
+    "zone_002",
+    "zone_001"
+  ],
+  "resources": {
+    "crowd_control": 15,
+    "medical_staff": 8,
+    "security_personnel": 6
+  },
+  "deployment_points": [
+    "evacuation_point_1",
+    "medical_station_1",
+    "security_checkpoint_1"
+  ],
+  "estimated_deployment_time_minutes": 12,
+  "instructions": [
+    "Medical team to medical_station_1 - establish triage",
+    "Crowd control to evacuation_point_1 - manage flow",
+    "Security to security_checkpoint_1 - control access",
+    "Maintain radio contact on channel 2",
+    "Report status every 5 minutes"
+  ]
+}

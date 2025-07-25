@@ -1,0 +1,51 @@
+[project]
+name = "drishti-supervisor"
+version = "0.1.0"
+description = "Drishti Supervisor Agent - Orchestrates and coordinates multiple specialized sub-agents for comprehensive event management including infrastructure, medical assistance, queue management, and security."
+authors = [
+    {name = "Drishti Team", email = "team@drishti.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies =[
+    "absl-py>=2.2.2,<3.0.0",
+    "asyncio",
+    "dataclasses-json>=0.6.0",
+    "google-adk>=1.8.0,<2.0.0",
+    "google-cloud-aiplatform[adk,agent_engine,agent-engines]>=1.100.0",
+    "google-cloud-bigquery>=3.31.0,<4.0.0",
+    "google-cloud-logging>=3.0.0",
+    "google-cloud-monitoring>=2.0.0",
+    "google-cloud-pubsub>=2.0.0",
+    "google-cloud-storage>=2.0.0",
+    "google-cloud-texttospeech>=2.0.0",
+    "google-cloud-translate>=3.0.0",
+    "google-genai>=1.5.0,<2.0.0",
+    "json-schema>=4.0.0",
+    "pathlib",
+    "pillow>=11.1.0,<12.0.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "requests>=2.25.0",
+    "schedule>=1.1.0",
+    "selenium>=4.30.0,<5.0.0",
+    "typing-extensions>=4.0.0",
+    "webdriver-manager>=4.0.2,<5.0.0"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry.scripts]
+deploy-local = "deployment.local:main"
+deploy-remote = "deployment.remote:main"
+cleanup = "deployment.cleanup:cleanup_deployment"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
