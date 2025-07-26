@@ -4,9 +4,13 @@ venv
 # Ignore pycache for all sub oprojects too
 **__pycache__**
 *.pyc
+# Environment files - ignore all .env files in the whole project
+**/.env*
+.env*
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 .env.development
 .env.test
+.env
