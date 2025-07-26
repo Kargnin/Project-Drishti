@@ -1,10 +1,11 @@
+import os
+from dotenv import load_dotenv
 from google.adk.agents import Agent
 from vertexai.preview.reasoning_engines import AdkApp
 import vertexai
-import os
-from dotenv import load_dotenv
 
 from .prompt import INFRASTRUCTURE_MANAGEMENT_PROMPT
+from ..tools.tools import graph_search_tool, get_entity_relationships_tool, get_entity_timeline_tool
 
 # Load environment variables
 load_dotenv()
@@ -20,14 +21,7 @@ infrastructure_agent = Agent(
     model="gemini-2.0-flash-001",
     description="Infrastructure Management Agent that oversees venue facilities, utility systems, equipment deployment, and infrastructure safety for comprehensive event management and emergency response.",
     instruction=INFRASTRUCTURE_MANAGEMENT_PROMPT,
-    tools=[],
-    # generation_config={
-    #     "temperature": 0.1,  # Low temperature for consistent infrastructure decisions
-    #     "top_p": 0.8,
-    #     "top_k": 40,
-    #     "max_output_tokens": 2048,
-    #     "response_mime_type": "application/json"
-    # }
+    tools=[graph_search_tool, get_entity_relationships_tool, get_entity_timeline_tool]
 )
 
 # Create the AdkApp wrapper

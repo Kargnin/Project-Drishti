@@ -1,6 +1,5 @@
 venv
 .venv
-env
 *__pycache__*
 # Ignore pycache for all sub oprojects too
 **__pycache__**

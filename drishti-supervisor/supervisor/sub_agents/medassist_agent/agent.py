@@ -1,10 +1,11 @@
+import os
+from dotenv import load_dotenv
 from google.adk.agents import Agent
 from vertexai.preview.reasoning_engines import AdkApp
 import vertexai
-import os
-from dotenv import load_dotenv
 
 from .prompt import MEDICAL_ASSISTANCE_PROMPT
+from ..tools.tools import graph_search_tool, get_entity_relationships_tool, get_entity_timeline_tool
 
 # Load environment variables
 load_dotenv()
@@ -20,14 +21,7 @@ medassist_agent = Agent(
     model="gemini-2.0-flash-001",
     description="Medical Assistance Agent that coordinates emergency medical response, health monitoring, medical resource deployment, and healthcare support for comprehensive event medical management.",
     instruction=MEDICAL_ASSISTANCE_PROMPT,
-    tools=[],
-    # generation_config={
-    #     "temperature": 0.1,  # Low temperature for consistent medical decisions
-    #     "top_p": 0.8,
-    #     "top_k": 40,
-    #     "max_output_tokens": 2048,
-    #     "response_mime_type": "application/json"
-    # }
+    tools=[graph_search_tool, get_entity_relationships_tool, get_entity_timeline_tool]
 )
 
 # Create the AdkApp wrapper

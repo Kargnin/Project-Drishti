@@ -55,6 +55,8 @@ def create() -> None:
         agent_engine=app,
         requirements=[
             "google-cloud-aiplatform[adk,agent_engines]",
+            "graphiti",
+            "graphiti-core[google-genai]",
         ],
         extra_packages=["./supervisor"],
     )
