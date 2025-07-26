@@ -43,10 +43,11 @@ flags.mark_bool_flags_as_mutual_exclusive(
 
 def create() -> None:
     """Creates a new deployment."""
-    # First wrap the agent in AdkApp
+    # First wrap the agent in AdkApp with A2A enabled
     app = reasoning_engines.AdkApp(
         agent=root_agent,
         enable_tracing=True,
+        a2a_enabled=True,
     )
 
     # Now deploy to Agent Engine
