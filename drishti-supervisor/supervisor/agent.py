@@ -9,6 +9,7 @@ from .sub_agents.infrastructure_agent import infrastructure_agent
 from .sub_agents.medassist_agent import medassist_agent
 from .sub_agents.queue_management_agent import queue_management_agent
 from .sub_agents.security_agent import security_agent
+from .sub_agents.tools import graph_search_tool, get_entity_relationships_tool, get_entity_timeline_tool
 
 # Load environment variables
 load_dotenv()
@@ -29,7 +30,8 @@ root_agent = Agent(
         medassist_agent,
         queue_management_agent,
         security_agent
-    ]
+    ],
+    tools=[graph_search_tool, get_entity_relationships_tool, get_entity_timeline_tool]
 )
 
 # # Create the AdkApp wrapper for the supervisor agent  

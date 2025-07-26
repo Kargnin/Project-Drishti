@@ -36,6 +36,7 @@ class InfrastructureType(str, Enum):
     EVACUATION_ASSEMBLY_POINT = "evacuation_assembly_point"
     RESOURCE_DEPOT = "resource_depot"
     COMMAND_CENTER = "command_center"
+    BUILDING = "building"
 
 class AccessLevel(str, Enum):
     PUBLIC = "public"
@@ -72,15 +73,15 @@ class Polygon(BaseModel):
 class InfrastructurePoint(BaseModel):
     id: str = Field(..., description="Unique identifier for the infrastructure point")
     name: str = Field(..., description="Human-readable name")
-    type: InfrastructureType
+    type: Union[InfrastructureType, str] = InfrastructureType.BUILDING  # Accept enum or string
     coordinates: Point
     capacity: Optional[int] = Field(None, description="Maximum capacity (people/resources)")
     operational_status: bool = Field(True, description="Whether the infrastructure is operational")
-    access_level: AccessLevel = AccessLevel.PUBLIC
-    emergency_priority: int = Field(1, ge=1, le=5, description="Priority level for emergency response (1=highest)")
+    access_level: Union[AccessLevel, str] = AccessLevel.PUBLIC  # Accept enum or string
+    emergency_priority: int = Field(4, ge=1, le=5, description="Priority level for emergency response (1=highest)")
     contact_info: Optional[Dict[str, Any]] = Field(None, description="Contact information")
     resources_available: List[str] = Field(default_factory=list, description="Available resources at this point")
-    supported_incidents: List[IncidentType] = Field(default_factory=list, description="Types of incidents this infrastructure can handle")
+    supported_incidents: List[Union[IncidentType, str]] = Field(default_factory=list, description="Types of incidents this infrastructure can handle")  # Accept list of enums or strings
 
 # Entry/Exit point model
 class EntryExitPoint(BaseModel):
@@ -89,7 +90,7 @@ class EntryExitPoint(BaseModel):
     coordinates: Point
     is_entry: bool = True
     is_exit: bool = True
-    access_level: AccessLevel = AccessLevel.PUBLIC
+    access_level: Union[AccessLevel, str] = AccessLevel.PUBLIC  # Accept enum or string
     operational_hours: Optional[Dict[str, Any]] = Field(None, description="Operating hours")
     max_throughput: Optional[int] = Field(None, description="Maximum people per hour")
     current_status: bool = Field(True, description="Currently open/closed")
@@ -99,11 +100,11 @@ class EntryExitPoint(BaseModel):
 class ZoneProperties(BaseModel):
     id: str = Field(..., description="Unique zone identifier")
     name: str = Field(..., description="Human-readable zone name")
-    zone_type: ZoneType
-    security_level: SecurityLevel = SecurityLevel.LOW
+    zone_type: Union[ZoneType, str]  # Accept enum or string
+    security_level: Union[SecurityLevel, str] = SecurityLevel.LOW  # Accept enum or string with enum default
     population_capacity: Optional[int] = Field(None, description="Maximum occupancy")
     current_population: Optional[int] = Field(None, description="Current estimated occupancy")
-    access_level: AccessLevel = AccessLevel.PUBLIC
+    access_level: Union[AccessLevel, str] = AccessLevel.PUBLIC  # Accept enum or string with enum default
     
     # Emergency response capabilities
     evacuation_time_minutes: Optional[int] = Field(None, description="Estimated evacuation time in minutes")
@@ -124,11 +125,20 @@ class ZoneProperties(BaseModel):
     communication_channels: List[str] = Field(default_factory=list, description="Available communication channels")
     resource_requirements: Dict[str, int] = Field(default_factory=dict, description="Resource requirements by type")
 
+# Communication protocol model for handling complex communication protocol objects
+class CommunicationProtocol(BaseModel):
+    name: str
+    channels: Optional[List[str]] = None
+    coverage: Optional[str] = None
+    priority: str
+    zone_types: Optional[List[str]] = None
+    type: Optional[str] = None
+
 # Enhanced geometry with properties
 class EnhancedGeometry(BaseModel):
-    type: Literal["Polygon"] = "Polygon"
-    coordinates: List[List[List[float]]]
-    properties: ZoneProperties
+    type: Literal["Feature"] = "Feature"      # ✅ Standard GeoJSON Feature
+    geometry: Polygon                         # ✅ Nested geometry object  
+    properties: ZoneProperties               # ✅ Same enhanced properties
 
 # Main enhanced GeoJSON model
 class EnhancedLocationData(BaseModel):
@@ -142,12 +152,12 @@ class EnhancedLocationData(BaseModel):
     
     # Emergency response metadata
     emergency_contacts: List[Dict[str, Any]] = Field(default_factory=list)
-    response_protocols: Dict[IncidentType, List[str]] = Field(default_factory=dict)
+    response_protocols: Dict[str, List[str]] = Field(default_factory=dict)  # Changed from Dict[IncidentType, List[str]] to Dict[str, List[str]]
     resource_inventory: Dict[str, int] = Field(default_factory=dict)
     
     # Agent system configuration
     agent_deployment_rules: Dict[str, Any] = Field(default_factory=dict)
-    communication_protocols: List[str] = Field(default_factory=list)
+    communication_protocols: List[CommunicationProtocol] = Field(default_factory=list)  # Updated to use CommunicationProtocol model
     
     @validator('features')
     def validate_features(cls, v):
@@ -158,7 +168,7 @@ class EnhancedLocationData(BaseModel):
 # Utility models for agent responses
 class EmergencyResponse(BaseModel):
     incident_id: str
-    incident_type: IncidentType
+    incident_type: Union[IncidentType, str]  # Accept enum or string
     location: Point
     affected_zones: List[str]
     required_resources: Dict[str, int]
@@ -256,7 +266,10 @@ def create_sample_zone(
     )
     
     return EnhancedGeometry(
-        type="Polygon",
-        coordinates=coordinates,
+        type="Feature",  # Changed from "Polygon" to "Feature"
+        geometry=Polygon(  # Wrapped coordinates in geometry object
+            type="Polygon",
+            coordinates=coordinates
+        ),
         properties=properties
     ) 

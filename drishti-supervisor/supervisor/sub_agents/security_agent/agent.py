@@ -1,10 +1,11 @@
+import os
+from dotenv import load_dotenv
 from google.adk.agents import Agent
 from vertexai.preview.reasoning_engines import AdkApp
 import vertexai
-import os
-from dotenv import load_dotenv
 
 from .prompt import SECURITY_MONITORING_PROMPT
+from ..tools.tools import graph_search_tool, get_entity_relationships_tool, get_entity_timeline_tool
 
 # Load environment variables
 load_dotenv()
@@ -20,14 +21,7 @@ security_agent = Agent(
     model="gemini-2.0-flash-001",
     description="Security Agent that monitors threats, manages access control, coordinates security responses, and ensures comprehensive safety and security for event participants.",
     instruction=SECURITY_MONITORING_PROMPT,
-    tools=[],
-    # generation_config={
-    #     "temperature": 0.1,  # Low temperature for consistent security decisions
-    #     "top_p": 0.8,
-    #     "top_k": 40,
-    #     "max_output_tokens": 2048,
-    #     "response_mime_type": "application/json"
-    # }
+    tools=[graph_search_tool, get_entity_relationships_tool, get_entity_timeline_tool]
 )
 
 # Create the AdkApp wrapper

@@ -1,10 +1,11 @@
+import os
+from dotenv import load_dotenv
 from google.adk.agents import Agent
 from vertexai.preview.reasoning_engines import AdkApp
 import vertexai
-import os
-from dotenv import load_dotenv
 
 from .prompt import QUEUE_MANAGEMENT_PROMPT
+from ..tools.tools import graph_search_tool, get_entity_relationships_tool, get_entity_timeline_tool
 
 # Load environment variables
 load_dotenv()
@@ -20,14 +21,7 @@ queue_management_agent = Agent(
     model="gemini-2.0-flash-001",
     description="Queue Management Agent that optimizes crowd flow, manages entry/exit processes, prevents bottlenecks, and ensures safe and efficient people movement throughout event venues.",
     instruction=QUEUE_MANAGEMENT_PROMPT,
-    tools=[],
-    # generation_config={
-    #     "temperature": 0.1,  # Low temperature for consistent crowd management decisions
-    #     "top_p": 0.8,
-    #     "top_k": 40,
-    #     "max_output_tokens": 2048,
-    #     "response_mime_type": "application/json"
-    # }
+    tools=[graph_search_tool, get_entity_relationships_tool, get_entity_timeline_tool]
 )
 
 # Create the AdkApp wrapper
