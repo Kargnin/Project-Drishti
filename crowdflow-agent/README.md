@@ -1,133 +1,221 @@
-# CrowdFlow Agent
+# CrowdFlow Agent - Two-Agent Pipeline
 
-The CrowdFlow Agent is a component of the Drishti Event Management System designed to predict and manage crowd density patterns using advanced computer vision and machine learning techniques.
+The CrowdFlow Agent is a sequential two-agent pipeline component of the Drishti Event Management System designed to analyze video input, generate structured crowd data, and provide forecasting with severity assessment for comprehensive crowd management.
 
-## Purpose
+## Pipeline Architecture
 
-This agent specializes in:
-- **Crowd Detection**: Using YOLOv3 and computer vision for accurate people counting
-- **Density Analysis**: Real-time crowd density measurement and classification
-- **Pattern Prediction**: Forecasting crowd movement and density evolution
-- **Heat Map Generation**: Creating visual density maps and risk assessments
-- **Flow Modeling**: Predicting crowd flow patterns and bottlenecks
+This system implements a **sequential two-agent pipeline** using Google's Agent Development Kit (ADK):
 
-## Capabilities
+### Agent 1: Video Analysis Agent
 
-- **Computer Vision Processing**: YOLOv3 object detection for crowd analysis
-- **Custom ML Models**: Vertex AI Vision integration with specialized crowd models
-- **Real-time Density Mapping**: Live crowd density heat maps and visualizations
-- **Predictive Analytics**: Forecasting crowd patterns and growth trends
-- **Safety Assessment**: Risk evaluation and emergency response recommendations
+-   **Input**: Video streams, camera feeds, image sequences
+-   **Processing**: Analyzes at 5 FPS (every 5 seconds) using YOLOv3 detection
+-   **Output**: Structured JSON tabular data with timestamp, crowd_density, crowd_velocity, crowd_behavior
+-   **Storage**: Data stored in BigQuery for downstream consumption
 
-## Technical Features
+### Agent 2: Forecasting & Severity Analysis Agent
 
-### Computer Vision & ML
-- **YOLOv3 Integration**: State-of-the-art object detection for person identification
-- **Density Algorithms**: Advanced spatial analysis for crowd density calculation
-- **Custom Models**: Specialized ML models trained for crowd behavior prediction
-- **Real-time Processing**: Live video feed analysis and instant predictions
+-   **Input**: Historical tabular data from Agent 1 or BigQuery
+-   **Processing**: Time-series analysis, trend prediction, anomaly detection
+-   **Output**: Predicted future values + severity scores (1-10 scale)
+-   **Features**: Early warning system, risk assessment, actionable recommendations
 
-### Analysis Categories
-- **Static Gathering**: Stationary crowds around stages and attractions
-- **Dynamic Flow**: Moving crowds through corridors and pathways
-- **Convergent Flow**: Multiple crowd streams joining at bottlenecks
-- **Divergent Flow**: Crowd dispersal from central points
+## Key Features
+
+### Video Analysis (Agent 1)
+
+-   **Frame Sampling**: 5 FPS analysis rate (every 5 seconds)
+-   **Computer Vision**: YOLOv3 person detection with >0.5 confidence
+-   **Density Calculation**: People per square meter analysis
+-   **Velocity Tracking**: Movement speed analysis (m/s)
+-   **Behavior Classification**: Normal, congested, excited, agitated, panic, dispersing
+
+### Forecasting & Severity (Agent 2)
+
+-   **Time Series Prediction**: Forecast next timestamp values
+-   **Severity Scoring**: 1-10 risk assessment scale
+-   **Anomaly Detection**: Statistical outlier identification
+-   **Trend Analysis**: Growth rate and pattern recognition
+-   **Early Warnings**: Critical threshold predictions
+
+### Data Pipeline
+
+-   **BigQuery Integration**: Structured data storage and retrieval
+-   **Real-time Processing**: 5-second analysis cycles
+-   **A2A Communication**: Agent-to-agent data flow
+-   **Scalable Architecture**: Cloud-native deployment ready
 
 ## Usage
 
-### Basic Usage
+### Complete Pipeline (Video → Analysis → Forecasting)
 
 ```python
-from crowdflow_agent import crowdflow_agent, crowdflow_app
+from crowdflow_agent import crowdflow_app
 
-# Analyze crowd density
-result = await crowdflow_app.query(
-    input_text="Dense crowd gathering near main stage area",
-    camera_feed_data=camera_data  # required for computer vision
-)
+# Video analysis pipeline
+video_input = {
+    "type": "video_analysis",
+    "video_source": "camera_feed_zone_a.mp4",
+    "analysis_params": {
+        "fps_sampling": 5,
+        "frame_interval": "5_seconds"
+    }
+}
 
-print(f"Density Level: {result['crowd_density_level']}")
-print(f"Person Count: {result['crowd_metrics']['estimated_count']}")
+# The pipeline automatically:
+# 1. Processes video with video_analysis_agent
+# 2. Generates tabular data
+# 3. Calls forecasting_agent with the data
+# 4. Returns integrated analysis + predictions
+result = await crowdflow_app.query(video_input)
+```
+
+### Historical Data Analysis (Forecasting Only)
+
+```python
+# Direct forecasting from historical data
+historical_data = {
+    "type": "forecasting_analysis",
+    "historical_data": [
+        {
+            "timestamp": "2024-01-15T14:25:00Z",
+            "crowd_density": 3.2,
+            "crowd_velocity": 0.6,
+            "crowd_behavior": "normal"
+        }
+        # ... more data points
+    ]
+}
+
+result = await crowdflow_app.query(historical_data)
 ```
 
 ### Response Format
 
-The agent returns a JSON response with:
+````
+
+## Output Format
+
+### Video Analysis Output (Agent 1)
+```json
+{
+    "pipeline_execution": {
+        "stage_1_completed": true,
+        "stage_2_completed": true,
+        "execution_time": "2024-01-15T14:30:00Z",
+        "data_quality_score": 0.92
+    },
+    "video_analysis_results": [
+        {
+            "timestamp": "2024-01-15T14:30:00Z",
+            "crowd_density": 4.2,
+            "crowd_velocity": 0.3,
+            "crowd_behavior": "congested",
+            "frame_analysis": {
+                "detected_persons": 85,
+                "coverage_area_sqm": 250,
+                "confidence_score": 0.92
+            }
+        }
+    ]
+}
+````
+
+### Forecasting Output (Agent 2)
 
 ```json
 {
-    "crowd_detected": true/false,
-    "crowd_density_level": "low"/"moderate"/"high"/"critical",
-    "confidence_score": 0.0-1.0,
-    "density_score": 1-10,
-    "analysis": "Detailed crowd density assessment",
-    "crowd_metrics": {
-        "estimated_count": 50-5000,
-        "density_per_sqm": 0.5-8.0,
-        "coverage_area_sqm": 100-10000,
-        "movement_speed": "stationary/slow/moderate/fast"
+    "forecast": {
+        "next_timestamp": "2024-01-15T14:30:10Z",
+        "predicted_crowd_density": 5.4,
+        "predicted_crowd_velocity": 0.1,
+        "predicted_crowd_behavior": "agitated",
+        "prediction_confidence": 0.85
     },
-    "flow_predictions": {
-        "direction": "north/south/east/west/convergent/divergent",
-        "predicted_growth": "decreasing/stable/increasing/rapid_growth",
-        "peak_time_estimate": "5-30 minutes",
-        "dispersion_pattern": "organized/chaotic/bottlenecked"
-    },
-    "safety_assessment": {
-        "crush_risk": "low/moderate/high/critical",
-        "exit_accessibility": "clear/partially_blocked/blocked",
-        "emergency_response_time": "immediate/minutes/delayed"
-    },
-    "density_map_regions": [
-        {
-            "region": "stage_front",
-            "density": "high",
-            "risk_level": "moderate"
+    "severity_analysis": {
+        "severity_score": 7,
+        "risk_level": "high",
+        "primary_risk_factors": ["increasing_density", "decreasing_velocity"],
+        "trend_analysis": {
+            "density_trend": "increasing",
+            "velocity_trend": "decreasing"
         }
-    ],
-    "recommended_actions": ["action1", "action2"],
-    "ml_model_outputs": {
-        "yolo_detections": 150,
-        "tracking_accuracy": 0.95,
-        "prediction_confidence": 0.88
     },
-    "requires_intervention": true/false
+    "recommendations": ["Monitor density levels closely", "Prepare crowd control measures", "Consider opening additional exit routes"],
+    "early_warnings": {
+        "critical_threshold_eta": "10-15 minutes",
+        "intervention_recommended": true,
+        "alert_level": "yellow"
+    }
 }
 ```
 
-## Density Levels
+## BigQuery Data Schema
 
-- **LOW (1-2)**: Light density (<2 people/m²), free movement
-- **MODERATE (3-5)**: Normal density (2-4 people/m²), comfortable movement
-- **HIGH (6-7)**: Heavy density (4-6 people/m²), restricted movement
-- **CRITICAL (8-10)**: Dangerous overcrowding (>6 people/m²), crush risk
+### crowd_analysis_data Table
 
-## Computer Vision Pipeline
+-   `timestamp`: Analysis timestamp (5-second intervals)
+-   `crowd_density`: People per square meter
+-   `crowd_velocity`: Average movement speed (m/s)
+-   `crowd_behavior`: Categorical behavior classification
+-   `detected_persons`: YOLOv3 detection count
+-   `coverage_area_sqm`: Analysis area in square meters
+-   `confidence_score`: Analysis confidence (0.0-1.0)
 
-### YOLOv3 Object Detection
-1. **Person Detection**: Identify all individuals in camera feeds
-2. **Confidence Filtering**: Use detections with >0.5 confidence
-3. **Bounding Box Analysis**: Extract spatial coordinates and dimensions
-4. **Tracking**: Multi-frame analysis for movement patterns
+### crowd_forecasts Table
 
-### Density Calculation
-1. **Spatial Calibration**: Convert pixel coordinates to real-world measurements
-2. **Area Segmentation**: Divide space into analysis grids
-3. **Density Mapping**: Calculate people per square meter
-4. **Heat Map Generation**: Create visual density representations
+-   `analysis_timestamp`: When forecast was generated
+-   `forecast_timestamp`: Predicted timestamp
+-   `predicted_crowd_density`: Forecasted density
+-   `severity_score`: Risk score (1-10)
+-   `risk_level`: low/moderate/high/critical
+-   `recommendations`: Array of action items
 
-### Predictive Modeling
-1. **Pattern Recognition**: Identify recurring crowd behaviors
-2. **Flow Prediction**: Forecast movement directions and speeds
-3. **Growth Modeling**: Predict crowd size evolution
-4. **Risk Assessment**: Evaluate safety conditions
+## Severity Scoring (1-10 Scale)
 
-## GCP Services Integration
+-   **1-2 (Minimal)**: Low density, normal behavior, stable trends
+-   **3-4 (Low)**: Moderate density, steady patterns
+-   **5-6 (Moderate)**: Increasing density, behavior changes
+-   **7-8 (High)**: High density, rapid changes, concerning patterns
+-   **9-10 (Critical)**: Dangerous overcrowding, panic behavior
 
-- **Vertex AI Vision**: Powers computer vision and object detection
-- **Custom ML Models**: Specialized crowd analysis models
-- **Cloud Storage**: Video feed storage and model artifacts
-- **AI Platform**: Model training and deployment infrastructure
+## Deployment
+
+### Google Cloud Agent Engine
+
+```python
+from vertexai import agent_engines
+from crowdflow_agent import crowdflow_app
+
+# Deploy with A2A enabled
+remote_app = agent_engines.create(
+    agent_engine=crowdflow_app,  # Already A2A enabled
+    requirements=[
+        "google-cloud-aiplatform[adk,agent_engines]",
+        "google-cloud-bigquery",
+        "opencv-python",
+        "numpy"
+    ],
+    extra_packages=["./crowdflow-agent"]
+)
+```
+
+### BigQuery Setup
+
+```bash
+# Create dataset and tables
+bq mk --dataset --location=US project_id:crowdflow_data
+python bigquery_schema.py  # Creates tables with proper schema
+```
+
+## Architecture Benefits
+
+1. **Modular Design**: Separate video analysis and forecasting concerns
+2. **Scalable Processing**: Each agent can be optimized independently
+3. **Data-Driven**: Structured tabular output enables analytics
+4. **Real-time Capability**: 5-second analysis cycles for live monitoring
+5. **Predictive Insights**: Early warning system for proactive management
+6. **Cloud-Native**: Built for Google Cloud deployment and scaling
 
 ## Installation
 
@@ -138,47 +226,50 @@ pip install -r requirements.txt
 # Set environment variables
 export PROJECT_ID="your-gcp-project-id"
 export LOCATION="us-central1"
-export VISION_MODEL_ENDPOINT="your-model-endpoint"
-export STORAGE_BUCKET="crowdflow-data"
+export GOOGLE_CLOUD_STAGING_BUCKET="your-staging-bucket"
+```
+
+## Files Structure
+
+```
+crowdflow-agent/
+├── agent.py                    # Main pipeline orchestrator
+├── video_analysis_agent.py     # Agent 1: Video processing
+├── forecasting_agent.py        # Agent 2: Forecasting & severity
+├── pipeline_orchestrator.py    # Pipeline coordination logic
+├── bigquery_schema.py          # BigQuery table schemas
+├── pipeline_usage_examples.py  # Usage examples
+├── README.md                   # This documentation
+└── requirements.txt            # Dependencies
 ```
 
 ## Environment Variables
 
-- `PROJECT_ID`: Google Cloud Project ID
-- `LOCATION`: Google Cloud location (default: us-central1)
-- `VISION_MODEL_ENDPOINT`: Custom ML model endpoint
-- `STORAGE_BUCKET`: Cloud Storage bucket for video feeds
-
-## Technical Dependencies
-
-### Core ML/CV Libraries
-- **TensorFlow**: Deep learning framework for custom models
-- **OpenCV**: Computer vision processing and image manipulation
-- **NumPy**: Numerical computing for density calculations
-- **Scikit-learn**: Machine learning utilities and algorithms
-
-### Visualization
-- **Matplotlib**: Plotting and visualization for density maps
-- **Seaborn**: Statistical visualization for crowd analytics
+-   `PROJECT_ID`: Google Cloud Project ID
+-   `LOCATION`: Google Cloud location (default: us-central1)
+-   `GOOGLE_CLOUD_STAGING_BUCKET`: Staging bucket for deployments
 
 ## Key Metrics
 
 ### Crowd Detection Accuracy
-- Person detection precision and recall
-- Tracking accuracy across frames
-- Density calculation error rates
-- Prediction confidence scores
+
+-   Person detection precision and recall
+-   Tracking accuracy across frames
+-   Density calculation error rates
+-   Prediction confidence scores
 
 ### Performance Metrics
-- Real-time processing latency
-- Model inference speed
-- Memory and compute utilization
-- Scalability across multiple camera feeds
+
+-   Real-time processing latency
+-   Model inference speed
+-   Memory and compute utilization
+-   Scalability across multiple camera feeds
 
 ### Safety Metrics
-- Early warning accuracy for dangerous conditions
-- Emergency response trigger reliability
-- False positive/negative rates for safety alerts
+
+-   Early warning accuracy for dangerous conditions
+-   Emergency response trigger reliability
+-   False positive/negative rates for safety alerts
 
 ## Best Practices
 
@@ -190,9 +281,9 @@ export STORAGE_BUCKET="crowdflow-data"
 
 ## Integration with Other Agents
 
-- **Queue Management**: Provides crowd data for queue optimization
-- **Security**: Alerts for dangerous crowd conditions
-- **MedAssist**: Crowd density info for emergency response planning
-- **Supervisor**: High-level crowd status and coordination
+-   **Queue Management**: Provides crowd data for queue optimization
+-   **Security**: Alerts for dangerous crowd conditions
+-   **MedAssist**: Crowd density info for emergency response planning
+-   **Supervisor**: High-level crowd status and coordination
 
-This agent provides the foundational computer vision and ML capabilities needed for comprehensive crowd management and safety at large-scale events. 
+This agent provides the foundational computer vision and ML capabilities needed for comprehensive crowd management and safety at large-scale events.
